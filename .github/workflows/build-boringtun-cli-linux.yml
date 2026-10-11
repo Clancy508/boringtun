@@ -1,0 +1,23 @@
+name: Build boringtun-cli (Linux)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-unknown-linux-gnu
+      - name: Build boringtun-cli
+        run: cargo build --release --target x86_64-unknown-linux-gnu -p boringtun-cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boringtun-cli-linux-x86_64
+          path: target/x86_64-unknown-linux-gnu/release/boringtun-cli
+          if-no-files-found: error
