@@ -354,6 +354,11 @@ impl Device {
         let poll = EventPoll::<Handler>::new()?;
 
         // Create a tunnel device
+        #[cfg(target_os = "linux")]
+        let iface = Arc::new(
+            TunSocket::new_with_multi_queue(name, config.use_multi_queue)?.set_non_blocking()?,
+        );
+        #[cfg(not(target_os = "linux"))]
         let iface = Arc::new(TunSocket::new(name)?.set_non_blocking()?);
         let mtu = iface.mtu()?;
 
