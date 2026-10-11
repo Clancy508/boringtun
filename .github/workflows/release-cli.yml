@@ -1,0 +1,42 @@
+name: Release boringtun-cli
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Linux x86_64
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build CLI
+        run: cargo build --locked --release --package boringtun-cli
+      - name: Name CLI binary for release
+        run: cp target/release/boringtun-cli boringtun-cli-linux-x86_64
+      - name: Upload CLI binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: boringtun-cli-linux-x86_64
+          path: boringtun-cli-linux-x86_64
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - name: Download CLI binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Publish to this repository's releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
